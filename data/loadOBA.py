@@ -4,10 +4,8 @@ import numpy as np
 import time
 import code
 #import matplotlib.pyplot as plt
-#import gzip
 
 add_ones = lambda a: hstack((ones((a.shape[0])).reshape(a.shape[0], 1),a))
-convert_inoutbound = lambda x: (x == "Outbound") if 1 else 0
 
 def main():
   # Olympic Intercity Transit Data
@@ -75,7 +73,7 @@ def main():
       data_out = np.append(data_out, data_timeString, axis=1)
       
       # Save Data
-      fileout = "/projects/onebusaway/BakerNiedMLProject/intercitytransit_route13_{}.txt".format(date);
+      fileout = "/projects/onebusaway/BakerNiedMLProject/data/intercitytransit_route13_{}.txt".format(date);
       np.savetxt(fileout, data_out, fmt='%s')
     except:
       print "Something went wrong for the data on {}".format(date)
