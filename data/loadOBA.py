@@ -31,6 +31,8 @@ def main():
   dates = ["2013-06-10", "2013-06-11", "2013-06-12", "2013-06-13", "2013-06-14", "2013-06-17", "2013-06-18", "2013-06-19", "2013-06-20", "2013-06-21"]
   #date = "2013-06-10"
   for date in dates:
+    print "Loading {}".format(date)
+    
     try:
       filename = "{}/log-{}.gz".format(folder, date)
       
@@ -64,8 +66,8 @@ def main():
         if(trip_members.shape[0] >= 1):
           try:
             data_timeAlongTrip[trip_members] -= data_timeAlongTrip[trip_members].min()
-  	  except:
-  	    print "No trip_id {} on {}".format(trip_id, date)
+          except:
+            print "No trip_id {} on {}".format(trip_id, date)
       data_timeAlongTrip.shape = [N, 1]
       data_out = np.append(data_sorted, data_timeAlongTrip, axis=1)
       data_timeString = np.array(data_timeString)
@@ -73,7 +75,7 @@ def main():
       data_out = np.append(data_out, data_timeString, axis=1)
       
       # Save Data
-      fileout = "/projects/onebusaway/BakerNiedMLProject/data/intercitytransit_route13_{}.txt".format(date);
+      fileout = "/projects/onebusaway/BakerNiedMLProject/data/routedays/intercitytransit_route13_{}.txt".format(date);
       np.savetxt(fileout, data_out, fmt='%s')
     except:
       print "Something went wrong for the data on {}".format(date)
