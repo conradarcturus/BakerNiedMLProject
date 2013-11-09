@@ -1,7 +1,7 @@
 import numpy as np
 
 def main():
-	directory = "/projects/onebusaway/BakerNiedMLProject/data"
+	directory = "/projects/onebusaway/BakerNiedMLProject/data/routedays/"
 	serviceName = "intercitytransit"
 	routeName = "route13"
 	filespec = "{}/{}_{}_*.txt".format(directory, serviceName, routeName);
