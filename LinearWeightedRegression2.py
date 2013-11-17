@@ -80,7 +80,7 @@ def visualize(xTrain, yTrain, xTest, yTest, yHat, specification="model"):
 def main():
     ## Parameters ##
     N_points = -1 # Number of datapoints we are using
-    k        = 10  # How many nearest neighbors we will use
+    k        = 100  # How many nearest neighbors we will use
     dataPath = "/projects/onebusaway/BakerNiedMLProject/data/routefeatures"
     predPath = "/projects/onebusaway/BakerNiedMLProject/data/modelPredictions"
     serviceName = "intercitytransit"
