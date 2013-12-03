@@ -3,7 +3,6 @@ from __future__ import division
 import numpy as np
 import time
 import code
-#import matplotlib.pyplot as plt
 
 add_ones = lambda a: hstack((ones((a.shape[0])).reshape(a.shape[0], 1),a))
 
@@ -60,7 +59,7 @@ def main():
       data_timeString = [""] * N
       for i in range(N):
         data_timeString[i] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data_sorted[i, 4]))
-      data_timeAlongTrip = data_sorted[:, 4] # [0] * N
+      data_timeAlongTrip = data_sorted[:, 4].copy() # [0] * N
       for trip_id in trip_ids:
         trip_members = data_sorted[:, 5] == trip_id
         if(trip_members.shape[0] >= 1):
@@ -77,8 +76,9 @@ def main():
       # Save Data
       fileout = "/projects/onebusaway/BakerNiedMLProject/data/routedays/intercitytransit_route13_{}.txt".format(date);
       np.savetxt(fileout, data_out, fmt='%s')
-    except:
+    except Exception as inst:
       print "Something went wrong for the data on {}".format(date)
+      print "\t" + type(inst)     # the exception instance
 
   #gz = tarfile.open(name=filename, mode='r:gz')
   #gz = tarfile.open(name=filename, mode='r:gz', bufsize=10240)

@@ -17,24 +17,36 @@ class dataset:
         self.ySet = ySet
 
     def load(self, N_points = -1, validation = False, timeorganized = False):
-        xFull = np.loadtxt("{}/{}_{}_{}.txt".format(self.dataPath, self.serviceName, self.routeName, self.xSet), dtype=np.float)
-        yFull = np.loadtxt("{}/{}_{}_{}.txt".format(self.dataPath, self.serviceName, self.routeName, self.ySet), dtype=np.float)
-        if N_points == -1:
-            N_points = len(xFull)
-        self.sel   = np.random.permutation(range(len(xFull)))
-        split = N_points/4
+        # Get the data from the files
+        self.xFull = np.loadtxt("{}/{}_{}_{}.txt".format(self.dataPath, self.serviceName, self.routeName, self.xSet), dtype=np.float)
+        self.yFull = np.loadtxt("{}/{}_{}_{}.txt".format(self.dataPath, self.serviceName, self.routeName, self.ySet), dtype=np.float)
+        self.times = np.loadtxt("{}/{}_{}_timeglobal.txt".format(self.dataPath, self.serviceName, self.routeName), dtype=np.float)
 
-        self.xTest  = xFull[self.sel[3*split:4*split]]
-        self.yTest  = yFull[self.sel[3*split:4*split]]
+        # Divide the data into sets for Training, Validation, and Testing
+        if N_points == -1:
+            self.N = len(self.xFull)
+        else:
+            self.N = N_points
+        self.modelSets = np.random.permutation(range(len(self.xFull))) * 4 / self.N
+
+        self.xTest  = self.xFull[self.modelSets == 3]
+        self.yTest  = self.yFull[self.modelSets == 3]
+        self.tTest  = self.times[self.modelSets == 3]
+        self.xScope = self.xFull[self.modelSets < 3]
+        self.yScope = self.yFull[self.modelSets < 3]
+        self.tScope = self.times[self.modelSets < 3]
 
         if(validation):
-            self.xTrain = xFull[self.sel[       :2*split]]
-            self.xVal   = xFull[self.sel[2*split:3*split]]
-            self.yTrain = yFull[self.sel[       :2*split]]
-            self.yVal   = yFull[self.sel[2*split:3*split]]
+            self.xTrain = self.xFull[self.modelSets <= 1]
+            self.xVal   = self.xFull[self.modelSets == 2]
+            self.yTrain = self.yFull[self.modelSets <= 1]
+            self.yVal   = self.yFull[self.modelSets == 2]
+            self.tTrain = self.times[self.modelSets <= 1]
+            self.tVal   = self.times[self.modelSets == 2]
         else:
-            self.xTrain = xFull[self.sel[       :3*split]]
-            self.yTrain = yFull[self.sel[       :3*split]]
+            self.xTrain = self.xFull[self.modelSets <= 2]
+            self.yTrain = self.yFull[self.modelSets <= 2]
+            self.tTrain = self.times[self.modelSets <= 2]
 
     def save(self, data, model = "model"):
         np.savetxt("{}/{}_{}_{}_{}_{}.txt".format(self.resPath, self.serviceName, self.routeName, model, self.xSet, self.ySet), data)
@@ -77,11 +89,12 @@ def cmb(a, b, c):
     return np.append(a, np.append(b, c, axis = 1), axis = 1)
 
 def rmse(y, yhat):
-    yhat = y - yhat;
+    yhat.shape = y.shape
+    ydiff = y - yhat;
     count = 0;
-    for i in range(0,len(y)):
-        count += yhat[i] * yhat[i];
-    return (count / len(yhat)) ** 0.5
+    for i in range(len(yhat)):
+        count += ydiff[i] * ydiff[i];
+    return (count / len(ydiff)) ** 0.5
 
 class timer:
     def __init__(self):
