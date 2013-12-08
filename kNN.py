@@ -19,7 +19,7 @@ def manyNearestNeighbors(X, Y, xTest, k):
         yHat[i] = nearestNeighbors(X, Y, xTest[i], k)
     return yHat
 
-def manyNearestNeighborsVector(X, Y, xTest, k, futureMask = np.empty((1)), weights = np.array([1])):
+def regress(X, Y, xTest, k, futureMask = np.empty((1)), weights = np.array([1])):
     # Format the vectors
     if(X.ndim == 1):
 	    X.shape = (X.shape[0], 1)
@@ -57,7 +57,7 @@ def main():
         k = vals[i]
         
         timer = cmn.timer()
-        yHat = manyNearestNeighborsVector(data.xScope, data.yScope, data.xTest, k, futureMask)
+        yHat = regress(data.xScope, data.yScope, data.xTest, k, futureMask)
         print "k = {}\tRuntime = {:.2f}".format(k, timer.dur())
         rmse[i] = cmn.rmse(data.yTest, yHat)
         print "\tRMSE = {:.2f}".format(rmse[i])

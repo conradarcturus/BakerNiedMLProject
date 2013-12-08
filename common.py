@@ -7,46 +7,52 @@ import timeit
 from pylab import *
 
 class dataset:
-    def __init__(self, dataPath = "/projects/onebusaway/BakerNiedMLProject/data/routefeatures", resPath = "/projects/onebusaway/BakerNiedMLProject/data/modelPredictions", figPath = "/projects/onebusaway/BakerNiedMLProject/figures/predictions", serviceName = "intercitytransit", routeName = "route13", xSet = "dist", ySet = "dev"):
+    def __init__(self, dataPath = "/projects/onebusaway/BakerNiedMLProject/data/routefeatures", resPath = "/projects/onebusaway/BakerNiedMLProject/data/modelPredictions", figPath = "/projects/onebusaway/BakerNiedMLProject/figures/predictions", serviceName = "intercitytransit", routeName = "route13", xSet = "dist", ySet = "dev", xFeats = []):
         self.dataPath = dataPath
         self.resPath = resPath
         self.figPath = figPath
         self.serviceName = serviceName
         self.routeName = routeName
         self.xSet = xSet
+        self.xFeats = xFeats
         self.ySet = ySet
 
-    def load(self, N_points = -1, validation = False, timeorganized = False):
+    def load(self, N_points = -1, validation = False, timeorganized = False, Nparts = 4):
         # Get the data from the files
         self.xFull = np.loadtxt("{}/{}_{}_{}.txt".format(self.dataPath, self.serviceName, self.routeName, self.xSet), dtype=np.float)
         self.yFull = np.loadtxt("{}/{}_{}_{}.txt".format(self.dataPath, self.serviceName, self.routeName, self.ySet), dtype=np.float)
         self.times = np.loadtxt("{}/{}_{}_timeglobal.txt".format(self.dataPath, self.serviceName, self.routeName), dtype=np.float)
+        
+        # Limit features
+        # if xSet == "allfeats" -> DIST, DISTOLD, LAT, LON, TIMEGLOBAL, DAYOFWEEK, DAYS, TIME, TRIPID, DEV
+        if(len(xFeats) > 0)
+            self.xFull = self.xFull[:, xFeats]
 
         # Divide the data into sets for Training, Validation, and Testing
         if N_points == -1:
             self.N = len(self.xFull)
         else:
             self.N = N_points
-        self.modelSets = np.random.permutation(range(len(self.xFull))) * 4 / self.N
+        self.modelSets = np.random.permutation(range(len(self.xFull))) * Nparts / self.N
 
-        self.xTest  = self.xFull[self.modelSets == 3]
-        self.yTest  = self.yFull[self.modelSets == 3]
-        self.tTest  = self.times[self.modelSets == 3]
-        self.xScope = self.xFull[self.modelSets < 3]
-        self.yScope = self.yFull[self.modelSets < 3]
-        self.tScope = self.times[self.modelSets < 3]
+        self.xTest  = self.xFull[self.modelSets == Nparts - 1]
+        self.yTest  = self.yFull[self.modelSets == Nparts - 1]
+        self.tTest  = self.times[self.modelSets == Nparts - 1]
+        self.xScope = self.xFull[self.modelSets <= Nparts - 1]
+        self.yScope = self.yFull[self.modelSets <= Nparts - 1]
+        self.tScope = self.times[self.modelSets <= Nparts - 1]
 
         if(validation):
-            self.xTrain = self.xFull[self.modelSets <= 1]
-            self.xVal   = self.xFull[self.modelSets == 2]
-            self.yTrain = self.yFull[self.modelSets <= 1]
-            self.yVal   = self.yFull[self.modelSets == 2]
-            self.tTrain = self.times[self.modelSets <= 1]
-            self.tVal   = self.times[self.modelSets == 2]
+            self.xTrain = self.xFull[self.modelSets <= Nparts - 3]
+            self.xVal   = self.xFull[self.modelSets == Nparts - 2]
+            self.yTrain = self.yFull[self.modelSets <= Nparts - 3]
+            self.yVal   = self.yFull[self.modelSets == Nparts - 2]
+            self.tTrain = self.times[self.modelSets <= Nparts - 3]
+            self.tVal   = self.times[self.modelSets == Nparts - 2]
         else:
-            self.xTrain = self.xFull[self.modelSets <= 2]
-            self.yTrain = self.yFull[self.modelSets <= 2]
-            self.tTrain = self.times[self.modelSets <= 2]
+            self.xTrain = self.xFull[self.modelSets <= Nparts - 2]
+            self.yTrain = self.yFull[self.modelSets <= Nparts - 2]
+            self.tTrain = self.times[self.modelSets <= Nparts - 2]
 
     def save(self, data, model = "model"):
         np.savetxt("{}/{}_{}_{}_{}_{}.txt".format(self.resPath, self.serviceName, self.routeName, model, self.xSet, self.ySet), data)
