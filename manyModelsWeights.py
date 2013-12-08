@@ -35,8 +35,6 @@ def main():
     # Start a file to record
     filename = "{}/{}_{}_weightvalidation_allfeats_Ntrain{}.txt".format(data.resPath, data.serviceName, data.routeName, N_train)
     f = open(filename, 'w')
-    #filename = "{}/{}_{}_weightvalidationSum_Ntrain{}.txt".format(data.resPath, data.serviceName, data.routeName, N_train)
-    #f2 = open(filename, 'w')
 
     # Precompute the future mask
     futureMask = makeFutureMask(T, Tt, futureTime = -30 * 60)
@@ -56,7 +54,6 @@ def main():
     w = ws[0, :].copy()
     w.shape = (1, N_feat)
     for i in range(N_test):
-        #w.shape = (1, N_feat)
         i_point = i % N_test
         Xp = Xt[i_point, :].copy()
         Xp.shape = (1, N_feat)
@@ -90,7 +87,6 @@ def main():
     #str = "eta {}\tpass {}\tw={:.2f}, {:.2f}, {:.2f}, {:.2f}\trmse = {:.2f}\n\n".format(eta, 0, w[0, 0], w[0, 1], w[0, 2], w[0, 3], rmse)
     print str[:(len(str) - 1)]
     f.write(str)
-    #f2.write(str)
 
     for i_pass in range(N_passes):
 
@@ -173,57 +169,9 @@ def main():
         #str = "eta {}\tpass {}\tw={}\trmse = {:.2f}\n\n".format(eta, i_pass + 1, wstr, rmse)
         print str[:(len(str) - 1)]
         f.write(str)
-        #f2.write(str)
     
     f.close()
-    #f2.close()
 
-def nonsense(dist, futureMask, Y, k):
-    dist = np.sum( * weightstile, axis=1)
-
-    ## Try out some models with rhos and ks
-    filename = "{}/{}_{}_tests_Ntrain{}.txt".format(data.resPath, data.serviceName, data.routeName, N_train)
-    f = open(filename, 'w')
-    str = "Model\t{}\t{}\t{}\n".format("Param", "RunTime", "RMSE")
-    print str
-    f.write(str)
-
-    # Make a list of parameters to test
-    rhos = np.ceil(10 ** (np.arange(12) / 2.0))
-    ks   = np.ceil( 2 ** (np.arange(15) / 1.5))
-
-    # Allocate data containers
-    N_onTime = 1
-    N_kernel = len(rhos)
-    N_kNN = len(ks)
-    N_attempts = N_onTime + N_kernel + N_kNN
-    attempts = range(0, N_attempts)
-    rmses = np.zeros(shape=(N_attempts), dtype=np.float)
-    times = np.zeros(shape=(N_attempts), dtype=np.float)
-    models = [""] * N_attempts
-
-    for i in attempts:
-        timer = cmn.timer()
-        
-        if(i < N_onTime):
-            yHat = onTime(dist.shape[1])
-            models[i] = "onTime\t"
-        elif(i < (N_kernel + N_onTime)):
-            rho = rhos[i - N_onTime]
-            yHat = kernel(dist, futureMask, Y, rho)
-            models[i] = "kernel\t{: 5.0f}".format(rho)
-        elif(i < (N_kNN + N_kernel + N_onTime)):
-            k = ks[i - N_onTime - N_kernel]
-            yHat = kNN(dist, futureMask, Y, k)
-            models[i] = "kNN\t{: 5.0f}".format(k)
-
-        times[i] = timer.dur()
-        rmses[i] = cmn.rmse(data.yTest, yHat)
-        str = "{}\t{:.2f}\t{:.2f}\n".format(models[i], times[i], rmses[i])
-        print str
-        f.write(str)
-
-    f.close()
 
 def kNN(dist, futureMask, Y, k):
     distc = dist.copy()
